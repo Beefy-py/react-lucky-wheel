@@ -88,7 +88,7 @@ const Wheel = ({ wheel, spinBtn }: Props) => {
   };
 
   return (
-    <main
+    <section
       className="wheel-container"
       style={{
         position: "relative",
@@ -183,7 +183,7 @@ const Wheel = ({ wheel, spinBtn }: Props) => {
           );
         })}
       </div>
-    </main>
+    </section>
   );
 };
 
