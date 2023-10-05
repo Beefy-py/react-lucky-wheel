@@ -10,8 +10,8 @@ function App() {
           <main className="flex">
             <Wheel
               wheel={{
-                width: 400,
-                height: 400,
+                width: 500,
+                height: 500,
                 segments: [
                   { name: "One", image: "", hexColor: "#dd323e" },
                   { name: "Two", image: "", hexColor: "#ff452e" },
@@ -23,8 +23,8 @@ function App() {
                   { name: "Eight", image: "", hexColor: "#ac30fe" },
                   { name: "Nine", image: "", hexColor: "#bc2402" },
                   { name: "Ten", image: "", hexColor: "#fc3001" },
-                  // { name: "Eleven", image: "", hexColor: "#333ffe" },
-                  // { name: "Twelve", image: "", hexColor: "green" },
+                  { name: "Eleven", image: "", hexColor: "#333ffe" },
+                  { name: "Twelve", image: "", hexColor: "green" },
                   // { name: "13", image: "", hexColor: "red" },
                   // { name: "14", image: "", hexColor: "pink" },
                   // { name: "15", image: "", hexColor: "blue" },
@@ -44,6 +44,15 @@ function App() {
                 backgroundColor: "#ace500",
                 borderWidth: 4,
                 borderColor: "rgba(0,0,0,0.75)",
+                show: false,
+              }}
+              pin={{
+                width: 20,
+                height: 60,
+                backgroundColor: "black",
+                borderWidth: 2,
+                borderColor: "black",
+                show: true,
               }}
             />
           </main>

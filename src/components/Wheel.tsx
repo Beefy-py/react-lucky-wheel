@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useAnimate, motion } from "framer-motion";
 import styled from "styled-components";
 
 type Segment = { name: string; image: string; hexColor: string };
@@ -18,21 +19,21 @@ type Props = {
     backgroundColor: string;
     borderWidth: number;
     borderColor: string;
+    show?: boolean;
+  };
+  pin: {
+    width: number;
+    height: number;
+    backgroundColor: string;
+    borderWidth: number;
+    borderColor: string;
+    show?: boolean;
   };
 };
 
-const Wheel = ({ wheel, spinBtn }: Props) => {
-  const SpinBtn = styled.div`
-    &:after {
-      content: "";
-      position: absolute;
-      top: -28px;
-      width: 20px;
-      height: 30px;
-      background-color: ${spinBtn.backgroundColor};
-      clip-path: polygon(50% 0%, 15% 100%, 85% 100%);
-    }
-  `;
+const Wheel = ({ wheel, spinBtn, pin }: Props) => {
+  const [rotationValue, setRotationValue] = useState<number>(0);
+  const [scope, animate] = useAnimate();
 
   if (wheel.segments.length < 4) {
     throw new Error("Only allowing more than 4 segments");
@@ -42,29 +43,13 @@ const Wheel = ({ wheel, spinBtn }: Props) => {
     throw new Error("Only allowing less than 21 segments");
   }
 
-  const wheelRef = useRef<HTMLDivElement>(null);
-  const [value, setValue] = useState(0);
-  const [currentSegment, setCurrentSegmentIndex] = useState<number>(0);
-
-  const rotationPerSegment = 360 / wheel.segments.length;
+  // const wheelRef = useRef<HTMLDivElement>(null);
 
   const spin = () => {
-    let newValue: number;
-    if (wheelRef.current) {
-      newValue =
-        Math.floor(Math.random() * (360 - rotationPerSegment + 1)) +
-        rotationPerSegment;
-      console.log({ newValue, currentValue: value });
-      wheelRef.current.style.transform = `rotate(${newValue}deg)`;
-      setValue(newValue);
-    }
-
-    // Calculate the current segment
-    const newCurrentSegment = Math.floor(
-      (newValue! % 360) / rotationPerSegment
+    setRotationValue(
+      (previousRotationValue) =>
+        previousRotationValue + Math.floor(Math.random() * (3600 - 10 + 1)) + 10
     );
-    setCurrentSegmentIndex(newCurrentSegment);
-    console.log(`The wheel landed on segment ${newCurrentSegment}`);
   };
 
   const clipPathValues: Record<number, number> = {
@@ -87,6 +72,30 @@ const Wheel = ({ wheel, spinBtn }: Props) => {
     20: 27,
   };
 
+  const SpinBtn = styled.div`
+    &:after {
+      content: "";
+      position: absolute;
+      top: -28px;
+      width: 20px;
+      height: 30px;
+      background-color: ${spinBtn.backgroundColor};
+      clip-path: polygon(50% 0%, 15% 100%, 85% 100%);
+    }
+  `;
+
+  const Pin = styled.div`
+    &:after {
+      content: "";
+      position: absolute;
+      top: -28px;
+      width: 20px;
+      height: 40px;
+      background-color: ${pin.backgroundColor};
+      clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+    }
+  `;
+
   return (
     <section
       className="wheel-container"
@@ -99,33 +108,69 @@ const Wheel = ({ wheel, spinBtn }: Props) => {
         alignItems: "center",
       }}
     >
-      <SpinBtn
-        className="spinBtn"
-        style={{
-          position: "absolute",
-          width: `${spinBtn.width}px`,
-          height: `${spinBtn.height}px`,
-          background: `${spinBtn.backgroundColor}`,
-          borderRadius: "50%",
-          zIndex: 10,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          textTransform: "uppercase",
-          fontWeight: 600,
-          color: "#333",
-          letterSpacing: "0.1em",
-          border: `${spinBtn.borderWidth}px solid ${spinBtn.borderColor}`,
-          cursor: "pointer",
-          userSelect: "none",
-        }}
-        onClick={spin}
-      >
-        {spinBtn.text}
-      </SpinBtn>
-      <div
+      {spinBtn.show ? (
+        <SpinBtn
+          className="spinBtn"
+          style={{
+            position: "absolute",
+            width: `${spinBtn.width}px`,
+            height: `${spinBtn.height}px`,
+            background: `${spinBtn.backgroundColor}`,
+            borderRadius: "50%",
+            zIndex: 10,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            textTransform: "uppercase",
+            fontWeight: 600,
+            color: "#333",
+            letterSpacing: "0.1em",
+            border: `${spinBtn.borderWidth}px solid ${spinBtn.borderColor}`,
+            cursor: "pointer",
+            userSelect: "none",
+          }}
+          onClick={spin}
+        >
+          {spinBtn.text}
+        </SpinBtn>
+      ) : (
+        <div
+          className="spinBtn"
+          style={{
+            position: "absolute",
+            width: `${spinBtn.width / 5}px`,
+            height: `${spinBtn.height / 5}px`,
+            background: `${spinBtn.backgroundColor}`,
+            borderRadius: "50%",
+            zIndex: 10,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "pointer",
+            userSelect: "none",
+          }}
+        ></div>
+      )}
+
+      {pin.show && (
+        <Pin
+          className="pin"
+          style={{
+            position: "absolute",
+            background: `${pin.backgroundColor}`,
+            top: 12,
+            zIndex: 10,
+            display: "flex",
+            justifyContent: "space-evenly",
+          }}
+        />
+      )}
+      <motion.div
         className="wheel"
-        ref={wheelRef}
+        animate={{
+          rotate: rotationValue,
+          transition: { duration: 0 },
+        }}
         style={{
           position: "absolute",
           top: 0,
@@ -138,6 +183,7 @@ const Wheel = ({ wheel, spinBtn }: Props) => {
           boxShadow: `0 0 0 5px ${wheel.backgroundColor}, 0 0 0 15px #fff, 0 0 0 18px #111`,
           transition: `transform 5s ${wheel.timingFunction}`,
         }}
+        onClick={spin}
       >
         {wheel.segments.map((segment, index) => {
           // Calculate the rotation for each segment based on the total number of segments
@@ -182,7 +228,7 @@ const Wheel = ({ wheel, spinBtn }: Props) => {
             </div>
           );
         })}
-      </div>
+      </motion.div>
     </section>
   );
 };
