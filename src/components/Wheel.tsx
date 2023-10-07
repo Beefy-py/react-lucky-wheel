@@ -32,7 +32,7 @@ type Props = {
 };
 
 const Wheel = ({ wheel, spinBtn, pin }: Props) => {
-  const [rotationValue, setRotationValue] = useState<number>(0);
+  const [rotationValue, setRotationValue] = useState<number>(45);
   const [scope, animate] = useAnimate();
 
   if (wheel.segments.length < 4) {
@@ -43,32 +43,45 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
     throw new Error("Only allowing less than 21 segments");
   }
 
+  if (wheel.segments.length % 4 !== 0) {
+    throw new Error("The amount of items should be divisible by 4");
+  }
+
   // const wheelRef = useRef<HTMLDivElement>(null);
 
   const spin = () => {
-    setRotationValue(
-      (previousRotationValue) =>
-        previousRotationValue + Math.floor(Math.random() * (3600 - 10 + 1)) + 10
-    );
+    setRotationValue((previousRotationValue) => {
+      let result: number;
+      const max = 360;
+      const min = 10;
+
+      const randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
+
+      result = previousRotationValue + randomValue + 45;
+
+      console.log("Rotate Degrees: ", result % 360);
+
+      return result;
+    });
   };
 
   const clipPathValues: Record<number, number> = {
     4: 100,
-    5: 90,
+    // 5: 90,
     6: 80,
-    7: 65,
+    // 7: 65,
     8: 60,
-    9: 55,
+    // 9: 55,
     10: 50,
-    11: 45,
+    // 11: 45,
     12: 42,
-    13: 40,
+    // 13: 40,
     14: 37,
-    15: 35,
+    // 15: 35,
     16: 33,
-    17: 31,
-    18: 30,
-    19: 28,
+    // 17: 31,
+    // 18: 30,
+    // 19: 28,
     20: 27,
   };
 
@@ -167,6 +180,7 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
       )}
       <motion.div
         className="wheel"
+        initial={{ rotate: 45 }}
         animate={{
           rotate: rotationValue,
           transition: { duration: 0 },
@@ -192,6 +206,9 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
           // Calculate clipPath based on the number of segments
           const clipPathValue = clipPathValues[wheel.segments.length];
 
+          // Use the calculated rotation for the transform
+          const segmentRotation = rotation * (index + 0.5);
+
           return (
             <div
               key={index + segment.name}
@@ -201,8 +218,7 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
                 height: "50%",
                 background: segment.hexColor,
                 transformOrigin: "bottom right",
-                // Use the calculated rotation for the transform
-                transform: `rotate(${rotation * (index + 0.5)}deg)`,
+                transform: `rotate(${segmentRotation}deg)`,
                 // Use the calculated clipPathValue for the clipPath
                 clipPath: `polygon(0 0, ${clipPathValue}% 0, 100% 100%, 0 ${clipPathValue}%)`,
                 display: "flex",
@@ -223,7 +239,7 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
                   textShadow: "3px 5px 2px rgba(0,0,0,0.15)",
                 }}
               >
-                {segment.name}
+                {rotation * (index + 1)}deg
               </span>
             </div>
           );
