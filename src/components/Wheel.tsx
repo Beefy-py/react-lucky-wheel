@@ -15,6 +15,7 @@ type Props = {
     backgroundColor: string;
     timingFunction: string;
     rotations: number;
+    disabled: boolean;
   };
   spinBtn: {
     text: string;
@@ -39,7 +40,10 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
   const startingRotation = 45; //base starting position. This is to start in the middle 90deg
   const initialRotationValue = (360*wheel.rotations)+startingRotation;
   const [rotationValue, setRotationValue] = useState<number>(initialRotationValue);
-  const [segments, setSegments] = useState<ExtendedSegment[]>([]);console.log(segments);
+  const [segments, setSegments] = useState<ExtendedSegment[]>([]);
+  const [spun, setSpun] = useState(false);
+  const [winningSegment, setWinningSegment] = useState<ExtendedSegment| undefined>(undefined);
+  const [isWheelDisabled, setIsWheelDisabled] = useState(wheel.disabled)
 
   if (wheel.segments.length < 4) {
     throw new Error("Only allowing more than 4 segments");
@@ -101,6 +105,17 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
   
   }, [])
 
+  useEffect(() => {
+    
+  if(spun){
+    setTimeout(()=>{
+      setIsWheelDisabled(true);
+    },wheel.rotations*1000)
+  }
+   
+  }, [spun])
+  
+
   const spin = () => {
     setRotationValue((previousRotationValue) => {
       const max = 45;
@@ -108,10 +123,16 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
 
        const rotationValue = Math.random() * (max - min) + min;
 
-      console.log("Rotate Degrees: ", rotationValue);
+      console.log("Rotate Degrees: ", rotationValue); 
+      setWinningSegment(segments.find(segment => {
+        if (segment.degreeSpan[0] < rotationValue && rotationValue < segment.degreeSpan[1]){
+return true;
+        }
+      }));
 
       return rotationValue;
     });
+    setSpun(true);
   };
 
   const SpinBtn = styled.div`
@@ -226,7 +247,7 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
           boxShadow: `0 0 0 5px ${wheel.backgroundColor}, 0 0 0 15px #fff, 0 0 0 18px #111`,
           transition: `transform 5s ${wheel.timingFunction}`,
         }}
-        onClick={spin}
+        onClick={()=> {if (isWheelDisabled){console.warn('Wheel Is Disabled')}else{spin()}}}
       >
         {segments.map((segment, index:number) => {
           const {segmentRotation, clipPathValue, rotation, name, color} = segment;
@@ -267,6 +288,17 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
           );
         })}
       </motion.div>
+    {isWheelDisabled &&   <div className="overlay"  style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: 'rgb(0 0 0 / 65%)',
+          borderRadius: "50%",
+          overflow: "hidden",
+       zIndex:10,cursor: "not-allowed"
+        }}/>}
     </section>
   );
 };

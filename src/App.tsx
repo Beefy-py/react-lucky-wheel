@@ -10,8 +10,8 @@ function App() {
           <main className="flex">
             <Wheel
               wheel={{
-                width: 500,
-                height: 500,
+                width: 400,
+                height: 400,
                 segments: [
                   { name: "One", image: "", color: "#dd323e" },
                   { name: "Two", image: "", color: "#ff452e" },
@@ -21,10 +21,10 @@ function App() {
                   { name: "Six", image: "", color: "#ac400f" },
                   { name: "Seven", image: "", color: "#bb30b3" },
                   { name: "Eight", image: "", color: "#ac30fe" },
-                  // { name: "Nine", image: "", color: "#bc2402" },
-                  // { name: "Ten", image: "", color: "#fc3001" },
-                  // { name: "Eleven", image: "", color: "#333ffe" },
-                  // { name: "Twelve", image: "", color: "green" },
+                  { name: "Nine", image: "", color: "#bc2402" },
+                  { name: "Ten", image: "", color: "#fc3001" },
+                  { name: "Eleven", image: "", color: "#333ffe" },
+                  { name: "Twelve", image: "", color: "green" },
                   // { name: "13", image: "", color: "red" },
                   // { name: "14", image: "", color: "pink" },
                   // { name: "15", image: "", color: "blue" },
@@ -37,6 +37,7 @@ function App() {
                 backgroundColor: "#aba034",
                 timingFunction: "ease-in-out",
                 rotations:3,
+                disabled: false,
               }}
               spinBtn={{
                 text: "spin",
