@@ -2,7 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAnimate, motion } from "framer-motion";
 import styled from "styled-components";
 
-type Segment = { name: string; image: string; hexColor: string };
+type Segment = { name: string; image: string; color: string };
+type ExtraSegmentFields = {segmentRotation: number, clipPathValue:number, degreeSpan:Array<number>, rotation:number}
+
+type ExtendedSegment = Segment & ExtraSegmentFields;
 
 type Props = {
   wheel: {
@@ -11,6 +14,7 @@ type Props = {
     segments: Array<Segment>;
     backgroundColor: string;
     timingFunction: string;
+    rotations: number;
   };
   spinBtn: {
     text: string;
@@ -32,8 +36,10 @@ type Props = {
 };
 
 const Wheel = ({ wheel, spinBtn, pin }: Props) => {
-  const [rotationValue, setRotationValue] = useState<number>(45);
-  const [scope, animate] = useAnimate();
+  const startingRotation = 45; //base starting position. This is to start in the middle 90deg
+  const initialRotationValue = (360*wheel.rotations)+startingRotation;
+  const [rotationValue, setRotationValue] = useState<number>(initialRotationValue);
+  const [segments, setSegments] = useState<ExtendedSegment[]>([]);console.log(segments);
 
   if (wheel.segments.length < 4) {
     throw new Error("Only allowing more than 4 segments");
@@ -46,24 +52,6 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
   if (wheel.segments.length % 4 !== 0) {
     throw new Error("The amount of items should be divisible by 4");
   }
-
-  // const wheelRef = useRef<HTMLDivElement>(null);
-
-  const spin = () => {
-    setRotationValue((previousRotationValue) => {
-      let result: number;
-      const max = 360;
-      const min = 10;
-
-      const randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
-
-      result = previousRotationValue + randomValue + 45;
-
-      console.log("Rotate Degrees: ", result % 360);
-
-      return result;
-    });
-  };
 
   const clipPathValues: Record<number, number> = {
     4: 100,
@@ -83,6 +71,47 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
     // 18: 30,
     // 19: 28,
     20: 27,
+  };
+
+  useEffect(() => {
+    
+  setSegments(() =>{
+    let previousRotation = 45;
+    let nextRotation;
+
+    return wheel.segments.map((segment, index) => {
+      // Calculate the rotation for each segment based on the total number of segments
+      const rotation = 360 / wheel.segments.length;
+  
+      // Calculate clipPath based on the number of segments
+      const clipPathValue = clipPathValues[wheel.segments.length];
+  
+      // Use the calculated rotation for the transform
+      const segmentRotation = rotation * (index + 0.5);
+  
+          // Calculate the starting and ending degree values for the degreeSpan
+          nextRotation = 45 - (rotation * (index + 1));
+          const startDegree = nextRotation;
+          const endDegree = previousRotation;
+          previousRotation = nextRotation;
+  
+      return {segmentRotation, degreeSpan:[startDegree,endDegree], clipPathValue, ...segment, rotation}})
+  }
+    )
+  
+  }, [])
+
+  const spin = () => {
+    setRotationValue((previousRotationValue) => {
+      const max = 45;
+      const min = -315;
+
+       const rotationValue = Math.random() * (max - min) + min;
+
+      console.log("Rotate Degrees: ", rotationValue);
+
+      return rotationValue;
+    });
   };
 
   const SpinBtn = styled.div`
@@ -180,9 +209,9 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
       )}
       <motion.div
         className="wheel"
-        initial={{ rotate: 45 }}
+        initial={{ rotate: initialRotationValue }}
         animate={{
-          rotate: rotationValue,
+          rotate: rotationValue ,
           transition: { duration: 0 },
         }}
         style={{
@@ -199,24 +228,17 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
         }}
         onClick={spin}
       >
-        {wheel.segments.map((segment, index) => {
-          // Calculate the rotation for each segment based on the total number of segments
-          const rotation = 360 / wheel.segments.length;
-
-          // Calculate clipPath based on the number of segments
-          const clipPathValue = clipPathValues[wheel.segments.length];
-
-          // Use the calculated rotation for the transform
-          const segmentRotation = rotation * (index + 0.5);
+        {segments.map((segment, index:number) => {
+          const {segmentRotation, clipPathValue, rotation, name, color} = segment;
 
           return (
             <div
-              key={index + segment.name}
+              key={index + name}
               style={{
                 position: "absolute",
                 width: "50%",
                 height: "50%",
-                background: segment.hexColor,
+                background: color,
                 transformOrigin: "bottom right",
                 transform: `rotate(${segmentRotation}deg)`,
                 // Use the calculated clipPathValue for the clipPath
