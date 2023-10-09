@@ -12,6 +12,30 @@ type Props = {
   pin: PinInterface
 };
 
+const ArrowSpinnerBtn = styled.div<{$arrowSpinnerBtn: ArrowSpinnerButtonInterface}>`
+&:after {
+  content: "";
+  position: absolute;
+  top: -28px;
+  width: 20px;
+  height: 30px;
+  background-color: ${props => props.$arrowSpinnerBtn.backgroundColor};
+  clip-path: polygon(50% 0%, 15% 100%, 85% 100%);
+}
+`;
+
+const Pin = styled.div<{$pin: PinInterface}>`
+&:after {
+  content: "";
+  position: absolute;
+  top: -28px;
+  width: 20px;
+  height: 40px;
+  background-color: ${props=> props.$pin.backgroundColor};
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+}
+`;
+
 const Wheel = ({ wheel, arrowSpinnerBtn, pin }: Props) => {
   const startingRotation = 45; //base starting position. This is to start in the middle 90deg
   const initialRotationValue = (360*wheel.rotations)+startingRotation;
@@ -119,30 +143,6 @@ return true;
     setSpun(true);
   };
 
-  const ArrowSpinnerBtn = styled.div`
-    &:after {
-      content: "";
-      position: absolute;
-      top: -28px;
-      width: 20px;
-      height: 30px;
-      background-color: ${arrowSpinnerBtn.backgroundColor};
-      clip-path: polygon(50% 0%, 15% 100%, 85% 100%);
-    }
-  `;
-
-  const Pin = styled.div`
-    &:after {
-      content: "";
-      position: absolute;
-      top: -28px;
-      width: 20px;
-      height: 40px;
-      background-color: ${pin.backgroundColor};
-      clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
-    }
-  `;
-
   return (
     <section
       className="wheel-container"
@@ -177,6 +177,7 @@ return true;
             userSelect: "none",
           }}
           onClick={spin}
+          $arrowSpinnerBtn={arrowSpinnerBtn}
         >
           {arrowSpinnerBtn.text}
         </ArrowSpinnerBtn>
@@ -210,6 +211,7 @@ return true;
             display: "flex",
             justifyContent: "space-evenly",
           }}
+          $pin={pin}
         />
       )}
       <motion.div
