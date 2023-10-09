@@ -1,49 +1,28 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useAnimate, motion } from "framer-motion";
 import styled from "styled-components";
-
-type Segment = { name: string; image: string; color: string };
-type ExtraSegmentFields = {segmentRotation: number, clipPathValue:number, degreeSpan:Array<number>, rotation:number}
-
-type ExtendedSegment = Segment & ExtraSegmentFields;
+import { ArrowSpinnerButtonInterface } from "../interfaces/arrowSpinButton.interface";
+import { PinInterface } from "../interfaces/pin.interface";
+import { WheelInterface } from "../interfaces/wheel.interface";
+import { ExtendedWheelSegmentInterface } from "../interfaces/extendedWheelSegment.interface";
 
 type Props = {
-  wheel: {
-    width: number;
-    height: number;
-    segments: Array<Segment>;
-    backgroundColor: string;
-    timingFunction: string;
-    rotations: number;
-    disabled: boolean;
-  };
-  spinBtn: {
-    text: string;
-    width: number;
-    height: number;
-    backgroundColor: string;
-    borderWidth: number;
-    borderColor: string;
-    show?: boolean;
-  };
-  pin: {
-    width: number;
-    height: number;
-    backgroundColor: string;
-    borderWidth: number;
-    borderColor: string;
-    show?: boolean;
-  };
+  wheel: WheelInterface
+  arrowSpinnerBtn:ArrowSpinnerButtonInterface
+  pin: PinInterface
 };
 
-const Wheel = ({ wheel, spinBtn, pin }: Props) => {
+const Wheel = ({ wheel, arrowSpinnerBtn, pin }: Props) => {
   const startingRotation = 45; //base starting position. This is to start in the middle 90deg
   const initialRotationValue = (360*wheel.rotations)+startingRotation;
   const [rotationValue, setRotationValue] = useState<number>(initialRotationValue);
-  const [segments, setSegments] = useState<ExtendedSegment[]>([]);
+  const [segments, setSegments] = useState<ExtendedWheelSegmentInterface[]>([]);
   const [spun, setSpun] = useState(false);
-  const [winningSegment, setWinningSegment] = useState<ExtendedSegment| undefined>(undefined);
-  const [isWheelDisabled, setIsWheelDisabled] = useState(wheel.disabled)
+  const [winningSegment, setWinningSegment] = useState<ExtendedWheelSegmentInterface| undefined>(undefined);
+  const [isWheelDisabled, setIsWheelDisabled] = useState(wheel.disabled);
+  const [started, setStarted] = useState(false);
+  const [reset, setReset] = useState(false);
+
 
   if (wheel.segments.length < 4) {
     throw new Error("Only allowing more than 4 segments");
@@ -114,6 +93,11 @@ const Wheel = ({ wheel, spinBtn, pin }: Props) => {
   }
    
   }, [spun])
+
+  useEffect(() => {
+ if(started) if (isWheelDisabled){console.warn('Wheel Is Disabled')}else{spin()};
+  }, [started])
+  
   
 
   const spin = () => {
@@ -135,14 +119,14 @@ return true;
     setSpun(true);
   };
 
-  const SpinBtn = styled.div`
+  const ArrowSpinnerBtn = styled.div`
     &:after {
       content: "";
       position: absolute;
       top: -28px;
       width: 20px;
       height: 30px;
-      background-color: ${spinBtn.backgroundColor};
+      background-color: ${arrowSpinnerBtn.backgroundColor};
       clip-path: polygon(50% 0%, 15% 100%, 85% 100%);
     }
   `;
@@ -171,14 +155,14 @@ return true;
         alignItems: "center",
       }}
     >
-      {spinBtn.show ? (
-        <SpinBtn
-          className="spinBtn"
+      {arrowSpinnerBtn.show ? (
+        <ArrowSpinnerBtn
+          className="arrowSpinnerBtn"
           style={{
             position: "absolute",
-            width: `${spinBtn.width}px`,
-            height: `${spinBtn.height}px`,
-            background: `${spinBtn.backgroundColor}`,
+            width: `${arrowSpinnerBtn.width}px`,
+            height: `${arrowSpinnerBtn.height}px`,
+            background: `${arrowSpinnerBtn.backgroundColor}`,
             borderRadius: "50%",
             zIndex: 10,
             display: "flex",
@@ -188,22 +172,22 @@ return true;
             fontWeight: 600,
             color: "#333",
             letterSpacing: "0.1em",
-            border: `${spinBtn.borderWidth}px solid ${spinBtn.borderColor}`,
+            border: `${arrowSpinnerBtn.borderWidth}px solid ${arrowSpinnerBtn.borderColor}`,
             cursor: "pointer",
             userSelect: "none",
           }}
           onClick={spin}
         >
-          {spinBtn.text}
-        </SpinBtn>
+          {arrowSpinnerBtn.text}
+        </ArrowSpinnerBtn>
       ) : (
         <div
-          className="spinBtn"
+          className="arrowSpinnerBtn"
           style={{
             position: "absolute",
-            width: `${spinBtn.width / 5}px`,
-            height: `${spinBtn.height / 5}px`,
-            background: `${spinBtn.backgroundColor}`,
+            width: `${arrowSpinnerBtn.width / 5}px`,
+            height: `${arrowSpinnerBtn.height / 5}px`,
+            background: `${arrowSpinnerBtn.backgroundColor}`,
             borderRadius: "50%",
             zIndex: 10,
             display: "flex",
@@ -247,7 +231,7 @@ return true;
           boxShadow: `0 0 0 5px ${wheel.backgroundColor}, 0 0 0 15px #fff, 0 0 0 18px #111`,
           transition: `transform 5s ${wheel.timingFunction}`,
         }}
-        onClick={()=> {if (isWheelDisabled){console.warn('Wheel Is Disabled')}else{spin()}}}
+   
       >
         {segments.map((segment, index:number) => {
           const {segmentRotation, clipPathValue, rotation, name, color} = segment;

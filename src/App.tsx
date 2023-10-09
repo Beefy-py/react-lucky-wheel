@@ -1,3 +1,4 @@
+
 import Wheel from "./components/Wheel";
 
 function App() {
@@ -7,6 +8,7 @@ function App() {
         <div>
           Run the following command to install the package.
           <pre>npm install react-lucky-wheel</pre>
+    
           <main className="flex">
             <Wheel
               wheel={{
@@ -39,7 +41,7 @@ function App() {
                 rotations:3,
                 disabled: false,
               }}
-              spinBtn={{
+              arrowSpinnerBtn={{
                 text: "spin",
                 width: 60,
                 height: 60,
@@ -58,6 +60,7 @@ function App() {
               }}
             />
           </main>
+       
         </div>
       </header>
     </div>
