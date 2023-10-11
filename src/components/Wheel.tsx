@@ -5,48 +5,59 @@ import { ArrowSpinnerButtonInterface } from "../interfaces/arrowSpinButton.inter
 import { PinInterface } from "../interfaces/pin.interface";
 import { WheelInterface } from "../interfaces/wheel.interface";
 import { ExtendedWheelSegmentInterface } from "../interfaces/extendedWheelSegment.interface";
+import { SpinButtonInterface } from "../interfaces/spinButton.interface";
+import SpinButton from "./SpinButton";
 
 type Props = {
-  wheel: WheelInterface
-  arrowSpinnerBtn:ArrowSpinnerButtonInterface
-  pin: PinInterface
+  wheel: WheelInterface;
+  arrowSpinnerBtn: ArrowSpinnerButtonInterface;
+  pin: PinInterface;
+  spinBtn: SpinButtonInterface;
+  maxSpins: number;
 };
 
-const ArrowSpinnerBtn = styled.div<{$arrowSpinnerBtn: ArrowSpinnerButtonInterface}>`
-&:after {
-  content: "";
-  position: absolute;
-  top: -28px;
-  width: 20px;
-  height: 30px;
-  background-color: ${props => props.$arrowSpinnerBtn.backgroundColor};
-  clip-path: polygon(50% 0%, 15% 100%, 85% 100%);
-}
+const ArrowSpinnerBtn = styled.div<{
+  $arrowSpinnerBtn: ArrowSpinnerButtonInterface;
+}>`
+  &:after {
+    content: "";
+    position: absolute;
+    top: -28px;
+    width: 20px;
+    height: 30px;
+    background-color: ${(props) => props.$arrowSpinnerBtn.backgroundColor};
+    clip-path: polygon(50% 0%, 15% 100%, 85% 100%);
+  }
 `;
 
-const Pin = styled.div<{$pin: PinInterface}>`
-&:after {
-  content: "";
-  position: absolute;
-  top: -28px;
-  width: 20px;
-  height: 40px;
-  background-color: ${props=> props.$pin.backgroundColor};
-  clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
-}
+const Pin = styled.div<{ $pin: PinInterface }>`
+  &:after {
+    content: "";
+    position: absolute;
+    top: -28px;
+    width: 20px;
+    height: 40px;
+    background-color: ${(props) => props.$pin.backgroundColor};
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+  }
 `;
 
-const Wheel = ({ wheel, arrowSpinnerBtn, pin }: Props) => {
+const Wheel = ({ wheel, arrowSpinnerBtn, pin, spinBtn, maxSpins }: Props) => {
   const startingRotation = 45; //base starting position. This is to start in the middle 90deg
-  const initialRotationValue = (360*wheel.rotations)+startingRotation;
-  const [rotationValue, setRotationValue] = useState<number>(initialRotationValue);
+  const initialRotationValue = 360 * wheel.rotations + startingRotation;
+  const [rotationValue, setRotationValue] =
+    useState<number>(initialRotationValue);
   const [segments, setSegments] = useState<ExtendedWheelSegmentInterface[]>([]);
-  const [spun, setSpun] = useState(false);
-  const [winningSegment, setWinningSegment] = useState<ExtendedWheelSegmentInterface| undefined>(undefined);
-  const [isWheelDisabled, setIsWheelDisabled] = useState(wheel.disabled);
-  const [started, setStarted] = useState(false);
-  const [reset, setReset] = useState(false);
+  const [winningSegment, setWinningSegment] = useState<
+    ExtendedWheelSegmentInterface | undefined
+  >(undefined);
+  const [spinTriggered, setSpinTriggered] = useState(false);
+  const [numberOfSpins, setNumberOfSpins] = useState(0);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [hasSpun, setHasSpun] = useState(false);
 
+  console.log({ winningSegment, numberOfSpins, maxSpins });
 
   if (wheel.segments.length < 4) {
     throw new Error("Only allowing more than 4 segments");
@@ -81,66 +92,90 @@ const Wheel = ({ wheel, arrowSpinnerBtn, pin }: Props) => {
   };
 
   useEffect(() => {
-    
-  setSegments(() =>{
-    let previousRotation = 45;
-    let nextRotation;
+    setSegments(() => {
+      let previousRotation = 45;
+      let nextRotation;
 
-    return wheel.segments.map((segment, index) => {
-      // Calculate the rotation for each segment based on the total number of segments
-      const rotation = 360 / wheel.segments.length;
-  
-      // Calculate clipPath based on the number of segments
-      const clipPathValue = clipPathValues[wheel.segments.length];
-  
-      // Use the calculated rotation for the transform
-      const segmentRotation = rotation * (index + 0.5);
-  
-          // Calculate the starting and ending degree values for the degreeSpan
-          nextRotation = 45 - (rotation * (index + 1));
-          const startDegree = nextRotation;
-          const endDegree = previousRotation;
-          previousRotation = nextRotation;
-  
-      return {segmentRotation, degreeSpan:[startDegree,endDegree], clipPathValue, ...segment, rotation}})
-  }
-    )
-  
-  }, [])
+      return wheel.segments.map((segment, index) => {
+        // Calculate the rotation for each segment based on the total number of segments
+        const rotation = 360 / wheel.segments.length;
 
-  useEffect(() => {
-    
-  if(spun){
-    setTimeout(()=>{
-      setIsWheelDisabled(true);
-    },wheel.rotations*1000)
-  }
-   
-  }, [spun])
+        // Calculate clipPath based on the number of segments
+        const clipPathValue = clipPathValues[wheel.segments.length];
 
-  useEffect(() => {
- if(started) if (isWheelDisabled){console.warn('Wheel Is Disabled')}else{spin()};
-  }, [started])
-  
-  
+        // Use the calculated rotation for the transform
+        const segmentRotation = rotation * (index + 0.5);
+
+        // Calculate the starting and ending degree values for the degreeSpan
+        nextRotation = 45 - rotation * (index + 1);
+        const startDegree = nextRotation;
+        const endDegree = previousRotation;
+        previousRotation = nextRotation;
+
+        return {
+          segmentRotation,
+          degreeSpan: [startDegree, endDegree],
+          clipPathValue,
+          ...segment,
+          rotation,
+        };
+      });
+    });
+  }, []);
 
   const spin = () => {
-    setRotationValue((previousRotationValue) => {
-      const max = 45;
-      const min = -315;
+    setSpinTriggered(true);
+    setIsSpinning(true);
 
-       const rotationValue = Math.random() * (max - min) + min;
+    if (maxSpins === numberOfSpins) {
+      console.warn("Max number of spins reached!");
+      return;
+    }
 
-      console.log("Rotate Degrees: ", rotationValue); 
-      setWinningSegment(segments.find(segment => {
-        if (segment.degreeSpan[0] < rotationValue && rotationValue < segment.degreeSpan[1]){
-return true;
-        }
-      }));
+    setNumberOfSpins((previousNumberOfSpins) => previousNumberOfSpins + 1);
 
-      return rotationValue;
-    });
-    setSpun(true);
+    if (segments.length) {
+      setRotationValue((previousRotationValue) => {
+        const randomSegmentIndex = parseInt(
+          (Math.random() * segments.length).toFixed()
+        );
+        console.log({ randomSegmentIndex });
+        const randomSegment = segments[randomSegmentIndex];
+        console.log({ randomSegment });
+
+        const max = randomSegment.degreeSpan[1];
+        const min = randomSegment.degreeSpan[0];
+
+        const rotationValue = Math.random() * (max - min) + min;
+
+        setWinningSegment(randomSegment);
+        return rotationValue;
+      });
+    } else {
+      console.error("There are no segments");
+    }
+  };
+
+  useEffect(() => {
+    if (spinTriggered) {
+      setTimeout(() => {
+        setIsSpinning(false);
+        setSpinTriggered(false);
+        setHasSpun(true);
+      }, 5000);
+    }
+  }, [numberOfSpins]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsResetting(false);
+      setHasSpun(false);
+    }, 5000);
+  }, [isResetting]);
+
+  const reset = () => {
+    setIsResetting(true);
+    setRotationValue(initialRotationValue);
   };
 
   return (
@@ -218,7 +253,7 @@ return true;
         className="wheel"
         initial={{ rotate: initialRotationValue }}
         animate={{
-          rotate: rotationValue ,
+          rotate: rotationValue,
           transition: { duration: 0 },
         }}
         style={{
@@ -233,10 +268,10 @@ return true;
           boxShadow: `0 0 0 5px ${wheel.backgroundColor}, 0 0 0 15px #fff, 0 0 0 18px #111`,
           transition: `transform 5s ${wheel.timingFunction}`,
         }}
-   
       >
-        {segments.map((segment, index:number) => {
-          const {segmentRotation, clipPathValue, rotation, name, color} = segment;
+        {segments.map((segment, index: number) => {
+          const { segmentRotation, clipPathValue, rotation, name, color } =
+            segment;
 
           return (
             <div
@@ -274,17 +309,16 @@ return true;
           );
         })}
       </motion.div>
-    {isWheelDisabled &&   <div className="overlay"  style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          background: 'rgb(0 0 0 / 65%)',
-          borderRadius: "50%",
-          overflow: "hidden",
-       zIndex:10,cursor: "not-allowed"
-        }}/>}
+
+      <SpinButton
+        clickHandler={() => spin()}
+        isSpinning={isSpinning}
+        isResetting={isResetting}
+        hasSpun={hasSpun}
+        spinTriggered={spinTriggered}
+        resetWheel={() => reset()}
+        buttonProps={spinBtn}
+      />
     </section>
   );
 };
