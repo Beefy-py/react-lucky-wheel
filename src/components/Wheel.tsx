@@ -7,6 +7,8 @@ import { WheelInterface } from "../interfaces/wheel.interface";
 import { ExtendedWheelSegmentInterface } from "../interfaces/extendedWheelSegment.interface";
 import { SpinButtonInterface } from "../interfaces/spinButton.interface";
 import SpinButton from "./SpinButton";
+import { ThemeEnum } from "../enums/theme.enum";
+import { getWheelTheme } from "../utils/getTheme";
 
 type Props = {
   wheel: WheelInterface;
@@ -14,6 +16,7 @@ type Props = {
   pin: PinInterface;
   spinBtn: SpinButtonInterface;
   maxSpins: number;
+  theme: ThemeEnum;
 };
 
 const ArrowSpinnerBtn = styled.div<{
@@ -30,19 +33,26 @@ const ArrowSpinnerBtn = styled.div<{
   }
 `;
 
-const Pin = styled.div<{ $pin: PinInterface }>`
+const Pin = styled.div<{ $pinBgColor: string }>`
   &:after {
     content: "";
     position: absolute;
     top: -28px;
     width: 20px;
     height: 40px;
-    background-color: ${(props) => props.$pin.backgroundColor};
+    background-color: ${(props) => props.$pinBgColor};
     clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
   }
 `;
 
-const Wheel = ({ wheel, arrowSpinnerBtn, pin, spinBtn, maxSpins }: Props) => {
+const Wheel = ({
+  wheel,
+  arrowSpinnerBtn,
+  pin,
+  spinBtn,
+  maxSpins,
+  theme,
+}: Props) => {
   const startingRotation = 45; //base starting position. This is to start in the middle 90deg
   const initialRotationValue = 360 * wheel.rotations + startingRotation;
   const [rotationValue, setRotationValue] =
@@ -188,6 +198,8 @@ const Wheel = ({ wheel, arrowSpinnerBtn, pin, spinBtn, maxSpins }: Props) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        borderRadius: "50%",
+        boxShadow: "-6px 25px 50px black",
       }}
     >
       {arrowSpinnerBtn.show ? (
@@ -221,9 +233,11 @@ const Wheel = ({ wheel, arrowSpinnerBtn, pin, spinBtn, maxSpins }: Props) => {
           className="arrowSpinnerBtn"
           style={{
             position: "absolute",
-            width: `${arrowSpinnerBtn.width / 5}px`,
-            height: `${arrowSpinnerBtn.height / 5}px`,
-            background: `${arrowSpinnerBtn.backgroundColor}`,
+            width: `${arrowSpinnerBtn.width / 3}px`,
+            height: `${arrowSpinnerBtn.height / 3}px`,
+            background: `${
+              arrowSpinnerBtn.backgroundColor || getWheelTheme.core(theme)
+            }`,
             borderRadius: "50%",
             zIndex: 10,
             display: "flex",
@@ -231,6 +245,7 @@ const Wheel = ({ wheel, arrowSpinnerBtn, pin, spinBtn, maxSpins }: Props) => {
             alignItems: "center",
             cursor: "pointer",
             userSelect: "none",
+            boxShadow: `-2px 3px 3px rgba(0,0,0,.4)`,
           }}
         ></div>
       )}
@@ -240,13 +255,12 @@ const Wheel = ({ wheel, arrowSpinnerBtn, pin, spinBtn, maxSpins }: Props) => {
           className="pin"
           style={{
             position: "absolute",
-            background: `${pin.backgroundColor}`,
             top: 12,
             zIndex: 10,
             display: "flex",
             justifyContent: "space-evenly",
           }}
-          $pin={pin}
+          $pinBgColor={pin.backgroundColor || getWheelTheme.pin(theme)}
         />
       )}
       <motion.div
@@ -262,16 +276,40 @@ const Wheel = ({ wheel, arrowSpinnerBtn, pin, spinBtn, maxSpins }: Props) => {
           left: 0,
           width: "100%",
           height: "100%",
-          background: wheel.backgroundColor,
+          background: wheel.backgroundColor || getWheelTheme.background(theme),
           borderRadius: "50%",
           overflow: "hidden",
-          boxShadow: `0 0 0 5px ${wheel.backgroundColor}, 0 0 0 15px #fff, 0 0 0 18px #111`,
+          boxShadow: `0 0 0 5px ${
+            wheel.boxShadowColor1 || getWheelTheme.boxShadowColor1(theme)
+          }, 0 0 0 15px ${
+            wheel.boxShadowColor2 || getWheelTheme.boxShadowColor2(theme)
+          }, 0 0 0 19px ${
+            wheel.boxShadowColor3 || getWheelTheme.boxShadowColor3(theme)
+          }`,
           transition: `transform 5s ${wheel.timingFunction}`,
         }}
       >
         {segments.map((segment, index: number) => {
-          const { segmentRotation, clipPathValue, rotation, name, color } =
-            segment;
+          const {
+            segmentRotation,
+            clipPathValue,
+            rotation,
+            name,
+            bgColor,
+            textColor,
+          } = segment;
+
+          const segmentBgColor =
+            bgColor ??
+            (index % 2 === 0
+              ? getWheelTheme.segmentBgColor2(theme)
+              : getWheelTheme.segmentBgColor1(theme));
+
+          const segmentTextColor =
+            textColor ??
+            (index % 2 === 0
+              ? getWheelTheme.segmentTextColor2(theme)
+              : getWheelTheme.segmentTextColor1(theme));
 
           return (
             <div
@@ -280,7 +318,7 @@ const Wheel = ({ wheel, arrowSpinnerBtn, pin, spinBtn, maxSpins }: Props) => {
                 position: "absolute",
                 width: "50%",
                 height: "50%",
-                background: color,
+                background: segmentBgColor,
                 transformOrigin: "bottom right",
                 transform: `rotate(${segmentRotation}deg)`,
                 // Use the calculated clipPathValue for the clipPath
@@ -299,8 +337,8 @@ const Wheel = ({ wheel, arrowSpinnerBtn, pin, spinBtn, maxSpins }: Props) => {
                   transform: `rotate(45deg)`,
                   fontSize: "1em",
                   fontWeight: 700,
-                  color: "white",
-                  textShadow: "3px 5px 2px rgba(0,0,0,0.15)",
+                  color: segmentTextColor,
+                  textShadow: "3px 5px 4px rgba(0,0,0,0.15)",
                 }}
               >
                 {rotation * (index + 1)}deg
@@ -315,6 +353,7 @@ const Wheel = ({ wheel, arrowSpinnerBtn, pin, spinBtn, maxSpins }: Props) => {
         isSpinning={isSpinning}
         isResetting={isResetting}
         hasSpun={hasSpun}
+        theme={theme}
         spinTriggered={spinTriggered}
         resetWheel={() => reset()}
         buttonProps={spinBtn}

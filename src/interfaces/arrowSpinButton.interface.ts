@@ -2,7 +2,7 @@ export interface ArrowSpinnerButtonInterface {
   text: string;
   width: number;
   height: number;
-  backgroundColor: string;
+  backgroundColor?: string;
   borderWidth: number;
   borderColor: string;
   show?: boolean;

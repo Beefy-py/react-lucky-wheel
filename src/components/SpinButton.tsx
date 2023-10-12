@@ -1,5 +1,7 @@
 import React from "react";
 import { SpinButtonInterface } from "../interfaces/spinButton.interface";
+import { ThemeEnum } from "../enums/theme.enum";
+import { getButtonTheme } from "../utils/getTheme";
 
 type Props = {
   buttonProps: SpinButtonInterface;
@@ -9,6 +11,7 @@ type Props = {
   hasSpun: boolean;
   isResetting: boolean;
   spinTriggered: boolean;
+  theme: ThemeEnum;
 };
 
 const SpinButton = ({
@@ -19,9 +22,11 @@ const SpinButton = ({
   isResetting,
   spinTriggered,
   resetWheel,
+  theme,
 }: Props) => {
   const {
     text,
+    textColor,
     borderWidth,
     borderColor,
     backgroundColor,
@@ -124,10 +129,14 @@ const SpinButton = ({
           style={{
             fontSize: getBtnSize(size),
             borderRadius: getBtnBorderRadius(rounded),
-            border: `${borderWidth}px solid ${borderColor}`,
+            border: `${borderWidth}px solid ${
+              borderColor || getButtonTheme.spin.borderColor(theme)
+            }`,
             padding: "0.5rem 1rem",
             cursor: "pointer",
-            backgroundColor: backgroundColor,
+            backgroundColor:
+              backgroundColor || getButtonTheme.spin.background(theme),
+            color: textColor || getButtonTheme.spin.textColor(theme),
           }}
           onClick={() => {
             clickHandler();
@@ -142,11 +151,14 @@ const SpinButton = ({
           style={{
             fontSize: getBtnSize(size),
             borderRadius: getBtnBorderRadius(rounded),
-            border: `${borderWidth}px solid ${borderColor}`,
+            border: `${borderWidth}px solid ${
+              borderColor || getButtonTheme.reset.borderColor(theme)
+            }`,
             padding: "0.5rem 1rem",
             cursor: "pointer",
-            backgroundColor: "red",
-            color: "white",
+            backgroundColor:
+              backgroundColor || getButtonTheme.reset.background(theme),
+            color: textColor || getButtonTheme.reset.textColor(theme),
           }}
           onClick={() => {
             resetWheel();
