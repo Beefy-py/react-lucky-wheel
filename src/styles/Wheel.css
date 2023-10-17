@@ -1,0 +1,104 @@
+/* :root {
+  --default-theme-wheel-background-color: wheat;
+  --heineken-version-one-theme-wheel-background-color: #001e38;
+} */
+
+/*DEFAULT THEMING*/
+.default-theme .wheel {
+  background-color: white;
+}
+
+.default-theme .segment:nth-child(odd) {
+  background-color: white;
+}
+
+.default-theme .segment:nth-child(odd) .segment-text {
+  color: black;
+}
+
+.default-theme .segment:nth-child(odd) {
+  background-color: black;
+}
+
+.default-theme .segment:nth-child(odd) .segment-text {
+  color: white;
+}
+
+.default-theme .core {
+  background-color: #fafafa;
+}
+
+.default-theme .pin::after {
+  background-color: #11af4e;
+}
+
+.default-theme .spin-button {
+  border-color: #11af4e;
+  background-color: #fafafa;
+  color: #11af4e;
+}
+.default-theme .spin-button:disabled {
+  cursor: not-allowed;
+  opacity: 40%;
+}
+
+.default-theme .reset-button {
+  border-color: black;
+  background-color: #fafafa;
+  color: black;
+}
+.default-theme .reset-button:disabled {
+  cursor: not-allowed;
+  opacity: 40%;
+}
+
+/*HEINEKEN VERSION ONE THEMING*/
+.heineken-version-one .wheel {
+  background-color: #001e38;
+  box-shadow: #001e38 0px 0px 0px 5px, #001e38 0px 0px 0px 15px,
+    #fafafa 0px 0px 0px 19px;
+}
+
+.heineken-version-one .segment:nth-child(odd) {
+  background-color: #fafafa;
+}
+
+.heineken-version-one .segment-text:nth-child(odd) {
+  color: #171717;
+}
+
+.heineken-version-one .segment:nth-child(even) {
+  background-color: #e3000f;
+}
+
+.heineken-version-one .segment-text:nth-child(even) {
+  color: #fafafa;
+}
+
+.heineken-version-one .core {
+  background-color: #fafafa;
+}
+
+.heineken-version-one .pin::after {
+  background-color: #f8b214;
+}
+
+.heineken-version-one .spin-button {
+  border-color: #001e38;
+  background-color: #fafafa;
+  color: #001e38;
+}
+.heineken-version-one .spin-button:disabled {
+  cursor: not-allowed;
+  opacity: 40%;
+}
+
+.heineken-version-one .reset-button {
+  border-color: #e3000f;
+  background-color: #fafafa;
+  color: #e3000f;
+}
+.heineken-version-one .reset-button:disabled {
+  cursor: not-allowed;
+  opacity: 40%;
+}

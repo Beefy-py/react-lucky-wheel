@@ -1,5 +1,4 @@
 import Wheel from "./components/Wheel";
-import { ThemeEnum } from "./enums/theme.enum";
 
 function App() {
   return (
@@ -10,7 +9,7 @@ function App() {
           <pre>npm install react-lucky-wheel</pre>
           <main className="flex">
             <Wheel
-              theme={ThemeEnum.HeinekenVersionOne}
+              // theme="heineken-version-one"
               maxSpins={4}
               wheel={{
                 width: 400,

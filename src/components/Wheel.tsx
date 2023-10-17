@@ -1,3 +1,4 @@
+import "../styles/Wheel.css";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useAnimate, motion } from "framer-motion";
 import styled from "styled-components";
@@ -7,8 +8,6 @@ import { WheelInterface } from "../interfaces/wheel.interface";
 import { ExtendedWheelSegmentInterface } from "../interfaces/extendedWheelSegment.interface";
 import { SpinButtonInterface } from "../interfaces/spinButton.interface";
 import SpinButton from "./SpinButton";
-import { ThemeEnum } from "../enums/theme.enum";
-import { getWheelTheme } from "../utils/getTheme";
 
 type Props = {
   wheel: WheelInterface;
@@ -16,7 +15,7 @@ type Props = {
   pin: PinInterface;
   spinBtn: SpinButtonInterface;
   maxSpins: number;
-  theme: ThemeEnum;
+  theme?: "heineken-version-one";
 };
 
 const ArrowSpinnerBtn = styled.div<{
@@ -33,14 +32,13 @@ const ArrowSpinnerBtn = styled.div<{
   }
 `;
 
-const Pin = styled.div<{ $pinBgColor: string }>`
+const Pin = styled.div`
   &:after {
     content: "";
     position: absolute;
     top: -28px;
     width: 20px;
     height: 40px;
-    background-color: ${(props) => props.$pinBgColor};
     clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
   }
 `;
@@ -190,7 +188,7 @@ const Wheel = ({
 
   return (
     <section
-      className="wheel-container"
+      className={`wheel-container ${theme ?? "default-theme"}`}
       style={{
         position: "relative",
         width: `${wheel.width}px`,
@@ -204,7 +202,7 @@ const Wheel = ({
     >
       {arrowSpinnerBtn.show ? (
         <ArrowSpinnerBtn
-          className="arrowSpinnerBtn"
+          className="arrow-spinner-btn"
           style={{
             position: "absolute",
             width: `${arrowSpinnerBtn.width}px`,
@@ -230,14 +228,11 @@ const Wheel = ({
         </ArrowSpinnerBtn>
       ) : (
         <div
-          className="arrowSpinnerBtn"
+          className="core"
           style={{
             position: "absolute",
             width: `${arrowSpinnerBtn.width / 3}px`,
             height: `${arrowSpinnerBtn.height / 3}px`,
-            background: `${
-              arrowSpinnerBtn.backgroundColor || getWheelTheme.core(theme)
-            }`,
             borderRadius: "50%",
             zIndex: 10,
             display: "flex",
@@ -260,7 +255,6 @@ const Wheel = ({
             display: "flex",
             justifyContent: "space-evenly",
           }}
-          $pinBgColor={pin.backgroundColor || getWheelTheme.pin(theme)}
         />
       )}
       <motion.div
@@ -276,16 +270,8 @@ const Wheel = ({
           left: 0,
           width: "100%",
           height: "100%",
-          background: wheel.backgroundColor || getWheelTheme.background(theme),
           borderRadius: "50%",
           overflow: "hidden",
-          boxShadow: `0 0 0 5px ${
-            wheel.boxShadowColor1 || getWheelTheme.boxShadowColor1(theme)
-          }, 0 0 0 15px ${
-            wheel.boxShadowColor2 || getWheelTheme.boxShadowColor2(theme)
-          }, 0 0 0 19px ${
-            wheel.boxShadowColor3 || getWheelTheme.boxShadowColor3(theme)
-          }`,
           transition: `transform 5s ${wheel.timingFunction}`,
         }}
       >
@@ -299,26 +285,14 @@ const Wheel = ({
             textColor,
           } = segment;
 
-          const segmentBgColor =
-            bgColor ??
-            (index % 2 === 0
-              ? getWheelTheme.segmentBgColor2(theme)
-              : getWheelTheme.segmentBgColor1(theme));
-
-          const segmentTextColor =
-            textColor ??
-            (index % 2 === 0
-              ? getWheelTheme.segmentTextColor2(theme)
-              : getWheelTheme.segmentTextColor1(theme));
-
           return (
             <div
+              className="segment"
               key={index + name}
               style={{
                 position: "absolute",
                 width: "50%",
                 height: "50%",
-                background: segmentBgColor,
                 transformOrigin: "bottom right",
                 transform: `rotate(${segmentRotation}deg)`,
                 // Use the calculated clipPathValue for the clipPath
@@ -331,13 +305,13 @@ const Wheel = ({
               }}
             >
               <span
+                className="segment-text"
                 style={{
                   position: "relative",
                   // Rotate the text back so it's horizontal
                   transform: `rotate(45deg)`,
                   fontSize: "1em",
                   fontWeight: 700,
-                  color: segmentTextColor,
                   textShadow: "3px 5px 4px rgba(0,0,0,0.15)",
                 }}
               >
@@ -353,7 +327,6 @@ const Wheel = ({
         isSpinning={isSpinning}
         isResetting={isResetting}
         hasSpun={hasSpun}
-        theme={theme}
         spinTriggered={spinTriggered}
         resetWheel={() => reset()}
         buttonProps={spinBtn}
