@@ -1,6 +1,12 @@
 import "../styles/Wheel.css";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useAnimate, motion } from "framer-motion";
+import {
+  motion,
+  // useMotionValue,
+  // useTransform,
+  // animate,
+  // useAnimate,
+} from "framer-motion";
 import styled from "styled-components";
 import { ArrowSpinnerButtonInterface } from "../interfaces/arrowSpinButton.interface";
 import { PinInterface } from "../interfaces/pin.interface";
@@ -15,6 +21,7 @@ type Props = {
   pin: PinInterface;
   spinBtn: SpinButtonInterface;
   maxSpins: number;
+  onFinished: Function;
   theme?: "heineken-version-one";
 };
 
@@ -49,6 +56,7 @@ const Wheel = ({
   pin,
   spinBtn,
   maxSpins,
+  onFinished,
   theme,
 }: Props) => {
   const startingRotation = 45; //base starting position. This is to start in the middle 90deg
@@ -65,8 +73,6 @@ const Wheel = ({
   const [isResetting, setIsResetting] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
 
-  console.log({ winningSegment, numberOfSpins, maxSpins });
-
   if (wheel.segments.length < 4) {
     throw new Error("Only allowing more than 4 segments");
   }
@@ -78,6 +84,15 @@ const Wheel = ({
   if (wheel.segments.length % 4 !== 0) {
     throw new Error("The amount of items should be divisible by 4");
   }
+
+  // const count = useMotionValue(5);
+  // const countDownValue = useTransform(count, Math.round);
+
+  // useEffect(() => {
+  //   const animation = animate(count, 0, { duration: 5 });
+
+  //   return animation.stop;
+  // }, []);
 
   const clipPathValues: Record<number, number> = {
     4: 100,
@@ -181,6 +196,12 @@ const Wheel = ({
     }, 5000);
   }, [isResetting]);
 
+  useEffect(() => {
+    setTimeout(() => {
+      onFinished(winningSegment);
+    }, 5000);
+  }, [winningSegment]);
+
   const reset = () => {
     setIsResetting(true);
     setRotationValue(initialRotationValue);
@@ -251,7 +272,7 @@ const Wheel = ({
           style={{
             position: "absolute",
             top: 12,
-            zIndex: 10,
+            zIndex: 15,
             display: "flex",
             justifyContent: "space-evenly",
           }}
@@ -321,6 +342,31 @@ const Wheel = ({
           );
         })}
       </motion.div>
+
+      {isResetting && (
+        <div
+          className="overlay"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgb(0 0 0 / 65%)",
+            borderRadius: "50%",
+            overflow: "hidden",
+            zIndex: 10,
+            cursor: "not-allowed",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {/* <motion.h1 style={{ color: "lightgray", fontSize: "3rem" }}>
+            {countDownValue}
+          </motion.h1> */}
+        </div>
+      )}
 
       <SpinButton
         clickHandler={() => spin()}

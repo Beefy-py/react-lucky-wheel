@@ -11,6 +11,9 @@ function App() {
             <Wheel
               // theme="heineken-version-one"
               maxSpins={4}
+              onFinished={(res: any) => {
+                console.log(res);
+              }}
               wheel={{
                 width: 400,
                 height: 400,
