@@ -23,6 +23,7 @@ type Props = {
   maxSpins: number;
   onFinished: Function;
   theme?: "heineken-version-one";
+  disabled?: boolean;
 };
 
 const ArrowSpinnerBtn = styled.div<{
@@ -58,6 +59,7 @@ const Wheel = ({
   maxSpins,
   onFinished,
   theme,
+  disabled,
 }: Props) => {
   const startingRotation = 45; //base starting position. This is to start in the middle 90deg
   const initialRotationValue = 360 * wheel.rotations + startingRotation;
@@ -368,15 +370,19 @@ const Wheel = ({
         </div>
       )}
 
-      <SpinButton
-        clickHandler={() => spin()}
-        isSpinning={isSpinning}
-        isResetting={isResetting}
-        hasSpun={hasSpun}
-        spinTriggered={spinTriggered}
-        resetWheel={() => reset()}
-        buttonProps={spinBtn}
-      />
+      {disabled || maxSpins === numberOfSpins ? (
+        ""
+      ) : (
+        <SpinButton
+          clickHandler={() => spin()}
+          isSpinning={isSpinning}
+          isResetting={isResetting}
+          hasSpun={hasSpun}
+          spinTriggered={spinTriggered}
+          resetWheel={() => reset()}
+          buttonProps={spinBtn}
+        />
+      )}
     </section>
   );
 };
