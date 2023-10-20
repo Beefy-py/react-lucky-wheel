@@ -1,7 +1,20 @@
 {
   "name": "react-lucky-wheel",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.1.0",
+  "description": "A customizable React component for creating dynamic wheel of fortune spinners with TypeScript support",
+  "author": "Kenny Hoft",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Beefy-py/react-lucky-wheel.git"
+  },
+  "license": "ISC",
+  "private": false,
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -24,6 +37,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "rollup": "rollup -c",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -46,5 +60,13 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "rollup": "^4.1.4",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-postcss": "^4.0.2"
   }
 }
