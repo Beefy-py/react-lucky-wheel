@@ -164,9 +164,7 @@ const Wheel = ({
         const randomSegmentIndex = parseInt(
           (Math.random() * segments.length).toFixed()
         );
-        console.log({ randomSegmentIndex });
         const randomSegment = segments[randomSegmentIndex];
-        console.log({ randomSegment });
 
         const max = randomSegment.degreeSpan[1];
         const min = randomSegment.degreeSpan[0];
